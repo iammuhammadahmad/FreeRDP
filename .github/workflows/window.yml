@@ -1,0 +1,43 @@
+name: Build FreeRDP Windows x64
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up MSVC
+      uses: microsoft/setup-msvc@v2
+      with:
+        msvc-version: 2019
+        architecture: x64
+
+    - name: Install CMake
+      run: |
+        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+      shell: powershell
+
+    - name: Configure and Build FreeRDP
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF
+        cmake --build . --config Release
+      working-directory: ${{ github.workspace }}/FreeRDP
+
+    - name: Create Artifact
+      run: |
+        mkdir artifacts
+        cp build/Release/*.dll artifacts/
+      working-directory: ${{ github.workspace }}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: FreeRDP-Windows-x64
+        path: artifacts/
