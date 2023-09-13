@@ -10,12 +10,18 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
+      
+    - name: Install Chocolatey
+      run: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+      shell: powershell
 
-    - name: Set up MSVC
-      uses: microsoft/setup-msvc@v2
-      with:
-        msvc-version: 2019
-        architecture: x64
+    - name: Install Visual C++ Redistributable Packages via Chocolatey
+      run: |
+        choco install visualcpp-build-tools -y
+        choco install vcbuildtools -y
+        choco install vc-runtime -y
+      shell: powershell
 
     - name: Install CMake
       run: |
